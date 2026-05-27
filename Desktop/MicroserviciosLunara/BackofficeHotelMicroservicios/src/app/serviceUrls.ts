@@ -1,12 +1,39 @@
 const normalizeBaseUrl = (value?: string) => value?.trim().replace(/\/+$/, '');
 
+const azureGatewayFallback = 'https://ms-gateway.bluecoast-e7499c30.eastus.azurecontainerapps.io';
+
+const isLocalRuntime = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+);
+
+const localDefaults = {
+  gateway: 'https://localhost:44361',
+  seguridad: 'https://localhost:44366',
+  reservas: 'https://localhost:44375',
+  facturacion: 'https://localhost:44390',
+  hospedaje: 'https://localhost:44321',
+  alojamiento: 'https://localhost:44394',
+};
+
+const productionDefaults = {
+  gateway: azureGatewayFallback,
+  seguridad: azureGatewayFallback,
+  reservas: azureGatewayFallback,
+  facturacion: azureGatewayFallback,
+  hospedaje: azureGatewayFallback,
+  alojamiento: azureGatewayFallback,
+};
+
+const fallbackUrls = isLocalRuntime ? localDefaults : productionDefaults;
+
 export const serviceUrls = {
-  gateway: normalizeBaseUrl(import.meta.env.VITE_GATEWAY_URL) ?? 'https://localhost:44361',
-  seguridad: normalizeBaseUrl(import.meta.env.VITE_SEGURIDAD_URL) ?? 'https://localhost:44366',
-  reservas: normalizeBaseUrl(import.meta.env.VITE_RESERVAS_URL) ?? 'https://localhost:44375',
-  facturacion: normalizeBaseUrl(import.meta.env.VITE_FACTURACION_URL) ?? 'https://localhost:44390',
-  hospedaje: normalizeBaseUrl(import.meta.env.VITE_HOSPEDAJE_URL) ?? 'https://localhost:44321',
-  alojamiento: normalizeBaseUrl(import.meta.env.VITE_ALOJAMIENTO_URL) ?? 'https://localhost:44394',
+  gateway: normalizeBaseUrl(import.meta.env.VITE_GATEWAY_URL) ?? fallbackUrls.gateway,
+  seguridad: normalizeBaseUrl(import.meta.env.VITE_SEGURIDAD_URL) ?? fallbackUrls.seguridad,
+  reservas: normalizeBaseUrl(import.meta.env.VITE_RESERVAS_URL) ?? fallbackUrls.reservas,
+  facturacion: normalizeBaseUrl(import.meta.env.VITE_FACTURACION_URL) ?? fallbackUrls.facturacion,
+  hospedaje: normalizeBaseUrl(import.meta.env.VITE_HOSPEDAJE_URL) ?? fallbackUrls.hospedaje,
+  alojamiento: normalizeBaseUrl(import.meta.env.VITE_ALOJAMIENTO_URL) ?? fallbackUrls.alojamiento,
 };
 
 export function resolveInternalServiceBaseUrl(path: string) {
